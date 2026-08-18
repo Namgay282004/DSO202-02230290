@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dso202-practical-01
+  labels:
+    dso202/practical: "01"
+    dso202/managed-by: declarative
+
+  annotations:
+    dso202.cst.edu.bt/description: "Namespace for DSO202 Practical 1 workloads"
+    dso202.cst.edu.bt/owner: "namgaywangchuk"
+    dso202.cst.edu.bt/date: "2026-08-11"
