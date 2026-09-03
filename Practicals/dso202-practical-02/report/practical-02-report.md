@@ -26,24 +26,28 @@ The objective of this practical was to implement and analyze the Kubernetes stor
     ![](../screenshots/2.png)
 
 *   **Step 5.4:** Checked disk space.
+
     ![](../screenshots/3.png) 
     **Observation:** With 92% disk usage, I noted the risk of Kubelet "Disk Pressure" eviction and proceeded with caution.
 
 ### Stage 1: Cluster, Namespace, and Storage Landscape
 
 *   **Step 6.1:** Created the cluster. 
+
     ![](../screenshots/4.png)
     ![](../screenshots/4.1.png)
     ![](../screenshots/4.2.png)
     **Observation:** Verified that worker-node-1 successfully mounted the host directory by running `docker exec`.
 
 *   **Step 6.2:** Applied Namespace, Quota, and StorageClass. 
+
     ![](../screenshots/5.png)
     ![](../screenshots/5.1.png)
     ![](../screenshots/5.2.png)
     **Observation:** The `resourcequota` output confirmed a 10Gi cap on the `standard` StorageClass.
 
-*   **Step 6.3:** Located the provisioner. 
+*   **Step 6.3:** Located the provisioner.
+
     ![](../screenshots/6.png)
     ![](../screenshots/6.1.png)
     ![](../screenshots/6.2.png)
@@ -52,19 +56,21 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 ### Stage 2: Static Provisioning and Reclaim Policy
 
 *   **Step 7.1:** Created the static PV.
-    ![](../screenshots/7.png)
 
+    ![](../screenshots/7.png)
     ![](../screenshots/7.1.png)
     **Observation:** `nodeAffinity` was set to `worker-node-1`, ensuring the volume can only be consumed where the host path exists.
 
 *   **Step 7.2:** Applied PVC and writer Pod. 
+
     ![](../screenshots/8.png)
     ![](../screenshots/8.1.png) 
     ![](../screenshots/8.2.png)
     ![](../screenshots/8.3.png)   
     **Observation:** The PVC bound instantly because the PV already existed (Static Provisioning).
 
-*   **Step 7.3:** Verified persistence.         
+*   **Step 7.3:** Verified persistence. 
+
     ![](../screenshots/9.png)
     ![](../screenshots/9.1.png)
     ![](../screenshots/9.2.png)
@@ -72,6 +78,7 @@ The objective of this practical was to implement and analyze the Kubernetes stor
     **Observation:** After deleting the pod, the `ledger.txt` file was intact, proving pod-level persistence.
 
 *   **Step 7.4:** Observed `Released` phase. 
+
     ![](../screenshots/10.png)
     ![](../screenshots/10.1.png)
     **Observation:** Upon deleting the PVC, the PV moved to `Released`. Crucially, the data remained on my laptop, confirming the `Retain` reclaim policy is host-aware.
@@ -79,14 +86,18 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 ### Stage 3: Dynamic Provisioning and Resizing
 
 *   **Step 8.1:** Applied dynamic PVC. 
+
     ![](../screenshots/11.png)
     ![](../screenshots/11.1.png)
     **Observation:** Status remained `Pending`. The event log showed "waiting for first consumer to be created before binding," proving the `WaitForFirstConsumer` mode.
 
 *   **Step 8.2:** Deployed `dynamic-writer`. 
+
     ![](../screenshots/12.png)
     **Observation:** The volume was provisioned on `worker-node-2`, as seen in the `docker exec` output.
-*   **Step 8.3:** Attempted resize. 
+
+*   **Step 8.3:** Attempted resize.
+
     ![](../screenshots/13.png)
     **Observation:** The patch failed with a "Forbidden" error. This proves that the `standard` StorageClass in Kind is immutable by default.
 
@@ -94,6 +105,7 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 ### Stage 4: Shared Storage Constraints
 
 *   **Step 9.1:** Deployed 3 replicas sharing one PVC.
+
     ![](../screenshots/14.png)
 
 *   **Step 9.2:** Checked pod placement. 
@@ -102,28 +114,34 @@ The objective of this practical was to implement and analyze the Kubernetes stor
     **Observation:** All three pods were scheduled on the same node. This is because a ReadWriteOnce (RWO) volume cannot be attached to multiple nodes simultaneously.
 
 *   **Step 9.3:** Read shared log. 
+
     ![](../screenshots/16.png)
     ![](../screenshots/16.1.png)
     **Observation:** The log showed interleaved entries from three different Pod UIDs, confirming simultaneous write access on a single node.
 
 ### Stage 5: StatefulSets and Stable Identity
 
-*   **Step 10.1:** Applied Headless Service. 
+*   **Step 10.1:** Applied Headless Service.
+
     ![](../screenshots/17.png)
     **Observation:** Unlike a standard Service, this has no ClusterIP, allowing direct DNS resolution to Pod IPs.
 
-*   **Step 10.2:** Created StatefulSet.         
+*   **Step 10.2:** Created StatefulSet.  
+
     ![](../screenshots/18.png)
     ![](../screenshots/18.1.png)
     **Observation:** Startup followed a strict 0-then-1 order. Each pod received a unique PVC (e.g., `content-webnote-0`).
 
 *   **Step 10.3:** DNS lookup. 
+
     ![](../screenshots/19.png)
     ![](../screenshots/19.1.png)
     ![](../screenshots/19.2.png)
     **Observation:** `nslookup` resolved `webnote-0.webnote` to a specific internal IP, providing a stable address that persists across restarts.
 
-*   **Step 10.5:** Delete and recreate. 
+*   **Step 10.5:** Delete and recreate.
+
+
     ![](../screenshots/20.png)
 **Observation:** Deleting `webnote-1` resulted in a new pod with the *same name* re-attaching to the *same volume*.
 
@@ -131,6 +149,7 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 ### Stage 6: Scaling and Rollouts
 
 *   **Step 11.2:** Scaled down to 2. 
+
     ![](../screenshots/21.png)
     ![](../screenshots/21.1.png)
     ![](../screenshots/21.2.png)
@@ -138,6 +157,7 @@ The objective of this practical was to implement and analyze the Kubernetes stor
     **Observation:** Pods were terminated in reverse order (`webnote-3`, then `webnote-2`).
 
 *   **Step 11.3:** Partitioned rollout. 
+
     ![](../screenshots/22.png)
     ![](../screenshots/22.1.png)
     ![](../screenshots/22.2.png)
@@ -145,16 +165,20 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 
 ### Stage 7: PostgreSQL Persistence
 
-*   **Step 12.2:** Deployed Postgres. **Observation:** The first start took longer as `initdb` was initializing the `/data` directory on the new volume.
+*   **Step 12.2:** Deployed Postgres. 
+
     ![](../screenshots/23.png)
     ![](../screenshots/23.1.png)
     ![](../screenshots/23.2.png)
+    **Observation:** The first start took longer as `initdb` was initializing the `/data` directory on the new volume.
+
 
 *   **Step 12.3:** Populated data. Created `tasks` table and inserted 3 rows.
+
     ![](../screenshots/24.png)
 
-
 *   **Step 12.4:** Tested persistence. 
+
     ![](../screenshots/24.1.png)
     ![](../screenshots/25.png)
     **Observation:** Deleted `postgres-0`. After recreation, the `SELECT count(*)` returned `3`. This is the ultimate proof that the data was safely stored on the PV.
@@ -163,10 +187,12 @@ The objective of this practical was to implement and analyze the Kubernetes stor
 ### Stage 8: Final Cleanup Analysis
 
 *   **Step 13.4:** Deleted all PVCs. 
+
     ![](../screenshots/26.png)
     **Observation:** The dynamic volumes vanished immediately, but the `pv-web-static` remained in `Released`.
 
 *   **Step 13.5:** Manual PV deletion. 
+
     ![](../screenshots/27.png)
     **Observation:** Even after `kubectl delete pv`, the host directory still contained the ledger file. This confirms that Kubernetes never deletes host-mounted data when using the `Retain` policy.
 
