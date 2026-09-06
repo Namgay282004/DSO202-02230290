@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: dso202-assignment-01
+  labels: { tier: frontend }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { tier: frontend }
+  template:
+    metadata:
+      labels: { tier: frontend }
+    spec:
+      containers:
+      - name: frontend
+        image: 02230290namgay/dso202-frontend:1.0
+        env:
+        - name: BACKEND_URL
+          valueFrom: { configMapKeyRef: { name: app-config, key: BACKEND_URL } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: dso202-assignment-01
+spec:
+  type: NodePort
+  selector: { tier: frontend }
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30081
