@@ -86,6 +86,14 @@ Using a `port-forward` for the backend on `30080` and the NodePort for the front
 
 ![Browser CRUD](../evidences/10.1.png)
 
+![Browser Results](../evidences/19.png)
+
+**Created and Updated Task**
+
+![Browser Results](../evidences/18.png)
+
+**Deleted Task**
+
 ![Browser Results](../evidences/10.png)
 
 ### 4.2 Task 7b: Service DNS Resolution
