@@ -1,8 +1,9 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
-- role: control-plane
+- role: control-plane # This is where the APIServer and ETCD live
+- role: worker        # This is where your App Pods will actually run
   extraPortMappings:
-  - containerPort: 30081 # For Frontend NodePort
+  - containerPort: 30081
     hostPort: 30081
     protocol: TCP
