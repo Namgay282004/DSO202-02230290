@@ -29,21 +29,27 @@ As I am working on an **ARM64** machine, the provided standard images were incom
 **Evidence: Docker Build and Push**
 
 *Building the Database Image:*
+
 ![Building DB](../evidences/1.png)
 
 *Publishing DB Image:*
+
 ![Pushing DB](../evidences/2.png)
 
 *Building the Backend Image:*
+
 ![Building Backend](../evidences/3.png)
 
 *Publishing Backend Image:*
+
 ![Pushing Backend](../evidences/4.png)
 
 *Building the Frontend Image:*
+
 ![Building Frontend](../evidences/5.png)
 
 *Publishing Frontend Image:*
+
 ![Pushing Frontend](../evidences/6.png)
 
 ---
@@ -54,6 +60,7 @@ As I am working on an **ARM64** machine, the provided standard images were incom
 Following the pattern in **Practical 1**, I initialized the cluster using a custom `kind-config.yaml` with a dedicated control-plane and a worker node. To satisfy **Task 5**, I mapped **port 30081** to the host via the worker node. I initially mapped 30080, but removed it after identifying that it blocked the `kubectl port-forward` required for the secure `ClusterIP` Backend service.
 
 **Evidence: Kind Cluster Creation**
+
 ![Kind Create](../evidences/7.png)
 
 ---
@@ -76,20 +83,26 @@ I applied the manifests in a logical sequence, starting with the **Namespace & G
 
 ### 4.1 Task 7a: Full CRUD Cycle
 Using a `port-forward` for the backend on `30080` and the NodePort for the frontend on `30081`, I verified the full stack functionality.
+
 ![Browser CRUD](../evidences/10.1.png)
+
 ![Browser Results](../evidences/10.png)
 
 ### 4.2 Task 7b: Service DNS Resolution
 I used `curl` from inside the Frontend Pod to reach the Backend via its internal Service name, proving **CoreDNS** functionality.
+
 ![DNS Resolution](../evidences/11.png)
 
 ### 4.3 Task 7c: Self-Healing & Data Persistence
 I deleted a backend pod and observed the **ReplicaSet** recreate it. I also deleted the DB pod and verified that my filed tasks were preserved by the PVC.
+
 ![Self-Healing 1](../evidences/12.png)
+
 ![Self-Healing 2](../evidences/13.png)
 
 ### 4.4 Task 7d: Declarative vs. Imperative Comparison
 I created a pod imperatively to compare with my declarative YAMLs. The `ResourceQuota` successfully blocked this until I patched the limits, proving active governance.
+
 ![Imperative vs Declarative](../evidences/14.png)
 
 ---
@@ -98,6 +111,7 @@ I created a pod imperatively to compare with my declarative YAMLs. The `Resource
 - **Challenge 1 (Architecture):** Incompatible images. *Resolution:* Rebuilt ARM64 images.
 - **Challenge 2 (Port Conflict):** Port 30080 blocked by Kind mapping. *Resolution:* Cleaned `kind-config` to allow manual port-forward.
 - **Challenge 3 (Governance):** Quota blocked imperative pod creation. *Resolution:* Patched quota limits.
+
 ![Quota Patch](../evidences/15.png)
 
 ---
