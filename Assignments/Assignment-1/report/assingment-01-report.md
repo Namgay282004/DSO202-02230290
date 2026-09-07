@@ -15,7 +15,7 @@ Before any manifest was written, a comprehensive analysis of the Kubernetes arch
 **The Control Plane (Orchestration Layer):**
 The lifecycle begins with the **kube-apiserver**, which serves as the central hub. It validates my YAML manifests for the namespace, deployments, and services, persisting the desired state into **etcd**. To follow the pattern established in **Practical 1**, I deployed a multi-node cluster. The **kube-scheduler** monitors the cluster for "unscheduled" pods. It performs a filtering and scoring process, ensuring that the control-plane node is reserved for cluster management and assigning my application workloads specifically to the **kind-worker** node.
 
-![](../evidences/0.png)
+![](../evidences/16.png)
 
 **The Node Components (Execution Layer):**
 Once a pod is scheduled to the **kind-worker** node, the **kubelet** on that specific node takes over. It coordinates with the **Container Runtime (Docker)** via the CRI to pull my custom ARM64 images from Docker Hub. The kubelet ensures that the containers start according to the PodSpec and maintains the health of the pods. Simultaneously, **kube-proxy** on the worker node manages the virtual networking. It manipulates IPtables rules to ensure that internal traffic to the **Headless Service** (Database) and **ClusterIP** (Backend) is routed correctly, and that the **NodePort** (Frontend) is accessible to the host.
