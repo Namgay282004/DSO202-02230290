@@ -1,0 +1,27 @@
+# kind-config.yaml
+# Assignment 2: adds ingress-ready labelling + host port 80/443 mapping
+# on the worker node, so the ingress-nginx controller (scheduled via its
+# nodeSelector ingress-ready=true) is reachable from the host machine.
+#
+# NOTE: kind port mappings are fixed at cluster creation time, so this
+# cluster must be created fresh (kind delete cluster && kind create cluster
+# --config kind-config.yaml), not patched onto the existing A1 cluster.
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP

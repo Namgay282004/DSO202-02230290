@@ -1,0 +1,38 @@
+# Requires the ingress-nginx controller to already be installed in the
+# cluster (see ASSIGNMENT-2-GUIDE.md, Step 2) - an Ingress object with no
+# controller watching it is accepted by the API server but does nothing
+# (Unit 2, 2.2.9). Add "127.0.0.1 tasktracker.local" to /etc/hosts before
+# testing, since this is a local kind cluster with no real DNS record.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tasktracker-ingress
+  namespace: dso202-assignment-02
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: tasktracker.local
+      http:
+        paths:
+          # Backend API path checked first: Prefix match on /api routes
+          # straight to backend-service. No rewrite-target annotation is
+          # needed because the backend's own routes already start with
+          # /api (see the Assignment 1 endpoint contract), so the path
+          # forwarded by the Ingress matches what the backend expects
+          # without modification.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 8080
+          # Everything else falls through to the frontend.
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80

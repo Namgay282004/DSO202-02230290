@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: dso202-assignment-02
+  labels: { tier: frontend }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { tier: frontend }
+  template:
+    metadata:
+      labels: { tier: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: 02230290namgay/dso202-frontend:1.0
+          env:
+            - name: BACKEND_URL
+              valueFrom: { configMapKeyRef: { name: app-config, key: BACKEND_URL } }
+---
+# Changed from A1: type NodePort -> ClusterIP. In A1 this Service was the
+# cluster's external entry point (via nodePort: 30081). In A2 the Ingress
+# object (05-ingress.yaml) is the entry point instead, so the frontend no
+# longer needs to be exposed directly - this is exactly the NodePort ->
+# Ingress migration Unit 2, Section 2.2.2 motivates.
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: dso202-assignment-02
+spec:
+  type: ClusterIP
+  selector: { tier: frontend }
+  ports:
+    - port: 80
+      targetPort: 8080

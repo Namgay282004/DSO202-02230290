@@ -1,0 +1,85 @@
+# Replaces A1's 02-storage.yaml (standalone PVC) and the database half
+# of 03-db.yaml (Deployment). The headless Service is unchanged from A1
+# (clusterIP: None was already correct there) - it is simply now paired
+# with a StatefulSet instead of a Deployment, which is what actually
+# activates the stable per-Pod DNS naming described in Unit 2, 2.1.5.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: dso202-assignment-02
+  labels:
+    tier: database
+spec:
+  clusterIP: None
+  selector:
+    tier: database
+  ports:
+    - port: 5432
+      name: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: dso202-assignment-02
+  labels:
+    tier: database
+spec:
+  serviceName: db-service          # must name the headless Service above
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      tier: database
+  template:
+    metadata:
+      labels:
+        tier: database
+    spec:
+      containers:
+        - name: postgres
+          image: 02230290namgay/dso202-db:1.0
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef: { name: app-config, key: POSTGRES_DB }
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef: { name: app-secret, key: POSTGRES_USER }
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: app-secret, key: POSTGRES_PASSWORD }
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:              # generates one PVC per replica
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0                   # 0 = every replica updates on rollout
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain               # keep data if the StatefulSet is deleted
+    whenScaled: Retain                # keep data if replicas is reduced
+
+# Note (documented deliberately, per the Common Pitfalls section of the
+# Unit 2 notes): only db-0 is used as the application's actual database,
+# via db-0.db-service in the ConfigMap. db-1 and db-2 are NOT configured
+# as Postgres streaming replicas - the official postgres image does not
+# self-configure replication, and wiring that up is outside this
+# assignment's scope. Their purpose here is to demonstrate the StatefulSet
+# mechanics themselves: ordered creation (db-0 -> db-1 -> db-2), a
+# distinct PVC per ordinal position, and a stable DNS identity for each
+# Pod that survives rescheduling - independently of whether the
+# application makes use of more than one of them.

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dso202-assignment-02
+---
+# Quota raised from A1's 1Gi/1 CPU because the database tier now runs
+# 3 replicas (StatefulSet) instead of 1 (Deployment): 3 DB + 2 backend
+# + 1 frontend = 6 containers total. At the LimitRange default request
+# of 256Mi/200m per container that's ~1.5Gi / 1.2 CPU at minimum, so
+# quota is set with headroom above that rather than exactly at it.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-cpu-quota
+  namespace: dso202-assignment-02
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-cpu-limits
+  namespace: dso202-assignment-02
+spec:
+  limits:
+    - default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 200m
+        memory: 256Mi
+      type: Container
