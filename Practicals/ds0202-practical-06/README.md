@@ -1,10 +1,5 @@
 # DSO202 Practical 06: Kubernetes Package Management with Helm
 
-**Course:** DSO202 — DevOps & Cloud Infrastructure  
-**Author:** Namgay Wangchuk  
-**Date:** October 1, 2026  
-**Repository:** [ds0202-practical-06](https://github.com/namgaywangchuk/ds0202-practical-06)
-
 ---
 
 ## Executive Summary
