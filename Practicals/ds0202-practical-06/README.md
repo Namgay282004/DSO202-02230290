@@ -604,6 +604,7 @@ helm template webapp-dev ./webapp -f environments/dev.yaml
 Simulating image tag floating point truncation and enforcing `values.schema.json` type constraints:
 
 ![Stage 5 - Image Tag Floating Point Conversion Demonstration](evidences/38.png)
+
 ![Stage 5 - JSON Schema Validation Rules Enforcement Error Output](evidences/39)
 
 ### Step 3: Dry-Run Server Validation & Release Loop
