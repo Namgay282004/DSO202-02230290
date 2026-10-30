@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dso202-prod
+
+namePrefix: prod-
+
+resources:
+  - ../../base
+
+patches:
+  - path: replica-patch.yaml
+  - target:
+      kind: Deployment
+      name: frontend-deployment
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Service
+      name: frontend-service
+    patch: |-
+      - op: replace
+        path: /spec/ports/0/nodePort
+        value: 30082

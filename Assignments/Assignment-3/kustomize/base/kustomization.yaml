@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - postgres-pvc.yaml
+  - db-deploy.yaml
+  - backend-deploy.yaml
+  - frontend-deploy.yaml
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - POSTGRES_DB=taskdb
+      - DB_HOST=dev-db-service
+      - DB_NAME=taskdb
+      - BACKEND_URL=http://localhost:9081
+
+secretGenerator:
+  - name: app-secret
+    literals:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=postgrespassword
+      - DB_USER=postgresuser
+      - DB_PASSWORD=postgrespassword

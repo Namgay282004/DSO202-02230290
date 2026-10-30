@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-db-deployment
+  labels:
+    tier: database
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.db }}
+  selector:
+    matchLabels:
+      tier: database
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        tier: database
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: postgres
+        image: {{ .Values.images.db }}
+        env:
+        - name: POSTGRES_DB
+          valueFrom: { configMapKeyRef: { name: "{{ .Release.Name }}-app-config", key: POSTGRES_DB } }
+        - name: POSTGRES_USER
+          valueFrom: { secretKeyRef: { name: "{{ .Release.Name }}-app-secret", key: POSTGRES_USER } }
+        - name: POSTGRES_PASSWORD
+          valueFrom: { secretKeyRef: { name: "{{ .Release.Name }}-app-secret", key: POSTGRES_PASSWORD } }
+        volumeMounts:
+        - name: db-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: db-storage
+        persistentVolumeClaim: { claimName: "{{ .Release.Name }}-postgres-pvc" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-db-service
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    tier: database
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - port: {{ .Values.service.dbPort }}

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend-deployment
+  labels:
+    tier: frontend
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.frontend }}
+  selector:
+    matchLabels:
+      tier: frontend
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        tier: frontend
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: frontend
+        image: {{ .Values.images.frontend }}
+        env:
+        - name: BACKEND_URL
+          valueFrom: { configMapKeyRef: { name: "{{ .Release.Name }}-app-config", key: BACKEND_URL } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-service
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  selector:
+    tier: frontend
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.service.frontendPort }}
+      targetPort: {{ .Values.service.frontendTargetPort }}
+      nodePort: {{ .Values.service.frontendNodePort }}

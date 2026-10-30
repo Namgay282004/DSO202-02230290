@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-app-config
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+data:
+  POSTGRES_DB: {{ .Values.env.postgresDb | quote }}
+  DB_HOST: "{{ .Release.Name }}-db-service"
+  DB_NAME: {{ .Values.env.postgresDb | quote }}
+  BACKEND_URL: "http://{{ .Release.Name }}-backend-service:{{ .Values.service.backendPort }}"

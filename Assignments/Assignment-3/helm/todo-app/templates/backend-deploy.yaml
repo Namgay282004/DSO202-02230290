@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend-deployment
+  labels:
+    tier: backend
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.backend }}
+  selector:
+    matchLabels:
+      tier: backend
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        tier: backend
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.images.backend }}
+        env:
+        - name: DB_HOST
+          valueFrom: { configMapKeyRef: { name: "{{ .Release.Name }}-app-config", key: DB_HOST } }
+        - name: DB_NAME
+          valueFrom: { configMapKeyRef: { name: "{{ .Release.Name }}-app-config", key: DB_NAME } }
+        - name: DB_USER
+          valueFrom: { secretKeyRef: { name: "{{ .Release.Name }}-app-secret", key: DB_USER } }
+        - name: DB_PASSWORD
+          valueFrom: { secretKeyRef: { name: "{{ .Release.Name }}-app-secret", key: DB_PASSWORD } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-backend-service
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    tier: backend
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - port: {{ .Values.service.backendPort }}

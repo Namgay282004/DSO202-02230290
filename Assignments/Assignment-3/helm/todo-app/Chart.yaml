@@ -1,0 +1,6 @@
+apiVersion: v2
+name: todo-app
+description: Helm Chart for DSO202 Assignment 3 Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

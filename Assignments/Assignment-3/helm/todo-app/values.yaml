@@ -1,0 +1,21 @@
+replicaCount:
+  db: 1
+  backend: 2
+  frontend: 1
+
+images:
+  db: 02230290namgay/dso202-db:1.0
+  backend: 02230290namgay/dso202-backend:1.0
+  frontend: 02230290namgay/dso202-frontend:1.0
+
+service:
+  dbPort: 5432
+  backendPort: 8080
+  frontendPort: 80
+  frontendTargetPort: 8080
+  frontendNodePort: 30083
+
+env:
+  postgresDb: taskdb
+  postgresUser: postgresuser
+  postgresPassword: postgrespassword
