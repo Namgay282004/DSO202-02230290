@@ -10,34 +10,8 @@ This technical report documents the design, implementation, diagnostic lifecycle
 
 The application uses a three-tier architecture:
 
-```
-[ Web Browser (Host Machine) ]
-             │
-             ▼ (Port Forwarding: http://localhost:9080)
-┌────────────────────────────────────────────────────────┐
-│ Frontend Tier (Nginx Web Server)                       │
-│ - Serves static SPA UI                                 │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼ (Port Forwarding: http://localhost:9081)
-┌────────────────────────────────────────────────────────┐
-│ Backend Tier (Node.js REST API)                        │
-│ - Processes API requests & connects to DB              │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼ (Cluster CoreDNS: dev-db-service:5432)
-┌────────────────────────────────────────────────────────┐
-│ Database Tier (PostgreSQL Relational DB)                │
-│ - Manages transactional storage for task items         │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼ (PersistentVolumeClaim)
-┌────────────────────────────────────────────────────────┐
-│ Storage Tier (PVC - postgres-pvc)                      │
-│ - Preserves database state across pod lifecycles       │
-└────────────────────────────────────────────────────────┘
-
-```
+![](evidences/a1.png)
+![](evidences/a2.png)
 
 1. **Frontend Tier**: Nginx web server rendering a single-page application (SPA).
 2. **Backend Tier**: Node.js REST API service (`02230290namgay/dso202-backend:1.0`) handling data persistence requests.
@@ -108,8 +82,6 @@ During initial deployment, database pods remained in a `Pending` state due to mi
 
 ![](evidences/11.png)
 *Figure 1.10: `kubectl describe pod` showing scheduling error: `persistentvolumeclaim "postgres-pvc" not found`.*
-
-*Figure 1.11: Detailed scheduler log confirming missing `postgres-pvc` resource.*
 
 *Figure 1.12: Applying updated manifests containing PVC definitions (`dev-postgres-pvc` and `prod-postgres-pvc`).*
 
